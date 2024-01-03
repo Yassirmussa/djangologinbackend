@@ -100,12 +100,27 @@ def login(request):
 
     response = Response()
 
-    token = jwt.encode(payload, 'secret', algorithm='HS256')
+    token = jwt.encode(payload, 'secret_key', algorithm='HS256')
     
-    response.set_cookie(key='jwt', value =token, httponly=True)
+    response.set_cookie(key='jwt', value = token, httponly=True)
     
+    return response
 
-    return Response({"jwt":token})
+
+# GET AUTHENTICATED USER
+@api_view(['GET'])
+def getautUser(request):
+    token = request.COOKIES.get('jwt')
+    if not token:
+        raise AuthenticationFailed('UnAuthenticated')
+    # try:
+    #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+
+    # except jwt.ExpiredSignatureError:
+    #     raise AuthenticationFailed('UnAuthenticated, signature expired')
+    return Response(token)
+
+
 
 #insert program
 @api_view(['POST'])

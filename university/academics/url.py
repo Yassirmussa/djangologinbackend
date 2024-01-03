@@ -14,7 +14,8 @@ urlpatterns = [
 
     # LOGIN API
     path('login', views.login),
-
+    # AUTH USER
+    path('getauthuser', views.getautUser),
     #API FOR PROGRAM
     path('insertprogram', views.insertProgram),
     path('getprogram', views.getProgram),

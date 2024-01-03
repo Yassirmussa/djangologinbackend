@@ -16,6 +16,8 @@ urlpatterns = [
     path('login', views.login),
     # AUTH USER
     path('getauthuser', views.getautUser),
+    # log out
+    path('logout', views.logout),
     #API FOR PROGRAM
     path('insertprogram', views.insertProgram),
     path('getprogram', views.getProgram),

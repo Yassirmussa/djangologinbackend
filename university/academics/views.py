@@ -116,11 +116,20 @@ def getautUser(request):
     # try:
     #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
 
-    # except jwt.ExpiredSignatureError:
-    #     raise AuthenticationFailed('UnAuthenticated, signature expired')
-    return Response(token)
+    # # except jwt.ExpiredSignatureError:
+    # #     raise AuthenticationFailed('UnAuthenticated, signature expired')
+    # user = User.objects.filter(id = payload['id']).first()
+    # serializer = UserSerializer(user)
+    return Response({token,1})
 
-
+@api_view(['POST'])
+def logout(request):
+    response = Response()
+    response.delete_cookie('jwt')
+    response.data = {
+        'message':"Logged Out"
+    }
+    return response
 
 #insert program
 @api_view(['POST'])

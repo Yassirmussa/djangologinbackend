@@ -6,6 +6,11 @@ class User(AbstractUser):
     UserID = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
     username = None
+    
+    
+    PhoneNumber = models.CharField(max_length=10)
+    Address = models.CharField(max_length=250)
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -24,7 +29,7 @@ class User(AbstractUser):
     )
 
     class Meta:
-        db_table = 'user'
+        db_table = 'users'
 
 
 class Program(models.Model):
@@ -38,10 +43,6 @@ class Program(models.Model):
 
 class Student(models.Model):
     StuID = models.AutoField(primary_key=True)
-    StuName = models.CharField(max_length=250)
-    
-    StuPhone = models.CharField(max_length=10)
-    StuAddress = models.CharField(max_length=250)
     
     UserID = models.OneToOneField(User, on_delete=models.CASCADE)
 

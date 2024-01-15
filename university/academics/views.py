@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes,authentication_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from . models import Program, Student, Todos, User
 from . serializers import ProgramSerializer, StudentSerializer ,TodosSerializer, UserSerializer
 from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth.models import auth 
 import jwt,datetime
 # Create your views here.
 
@@ -13,7 +16,7 @@ def hellomsg(request):
     return HttpResponse( "Hello from backend")
 
 @api_view(['GET', 'POST'])
-def example_view(request):
+def two_request(request):
     if request.method == 'GET':
         data = {'message': 'This is a GET request'}
         return Response(data)
@@ -77,50 +80,113 @@ def deleteUser(request, UserID):
         return Response(f"User with ID {UserID} deleted successifully")
     except:
         return Response(f"User with ID {UserID} does not exist")
-    
+
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def example_view(request, format=None):
+    content = {
+        'user': str(request.user),  # `django.contrib.auth.User` instance.
+        'auth': str(request.auth),  # None
+    }
+    return Response(content)
 
 # LOGIN
 # pip install PyJWT
+# @api_view(['POST'])
+# def login(request):
+#     email = request.data['email']
+#     password = request.data['password']
+#     user = User.objects.filter(email = email).first()
+
+#     if user is None:
+#         raise AuthenticationFailed("User does not exist")
+#     if not user.check_password(password):
+#         raise AuthenticationFailed('Incorrect password')
+#     auth.login(request, user)
+#     payload = {
+#         'id': user.UserID,
+#         'exp': datetime.datetime.now() + datetime.timedelta(minutes=1),
+#         'iat' :datetime.datetime.now()
+#     }
+
+#     response = Response()
+
+#     token = jwt.encode(payload, 'secret', algorithm='HS256')
+    
+#     response.set_cookie(key='jwt', value=token, httponly=True)
+    
+#     return response
+
+
 @api_view(['POST'])
 def login(request):
-    email = request.data['email']
-    password = request.data['password']
-    user = User.objects.filter(email = email).first()
-
-    if user is None:
-        raise AuthenticationFailed("User does not exist")
-    if not user.check_password(password):
-        raise AuthenticationFailed('Incorrect password')
+    email = request.data.get('email')
+    password = request.data.get('password')
     
+    if not email or not password:
+        raise AuthenticationFailed('Email and password are required.')
+
+    user = User.objects.filter(email=email).first()
+
+    if user is None or not user.check_password(password):
+        raise AuthenticationFailed('Invalid credentials.')
+
+    # Define the payload for the JWT token
     payload = {
-        'id': user.UserID,
-        'exp': datetime.datetime.now() + datetime.timedelta(minutes=1),
-        'iat' :datetime.datetime.now()
+        'id': user.UserID,  
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1),  # Token expiration time (adjust as needed)
+        'iat': datetime.datetime.utcnow(),
     }
 
+    # Generate the JWT token
+    token = jwt.encode(payload, 'YOUR_SECRET_KEY_HERE', algorithm='HS256')
+
+    # Create a response
     response = Response()
 
-    token = jwt.encode(payload, 'secret_key', algorithm='HS256')
+    # Set the JWT token in an HTTP-only cookie (adjust cookie attributes as needed)
+    response.set_cookie(key='jwt', value=token, httponly=True, samesite='strict')  
     
-    response.set_cookie(key='jwt', value = token, httponly=True)
-    
-    return response
+    # auth.login(request, user)
+    # Update the last_login timestamp for the user
+    user.last_login = datetime.datetime.now()
+    user.save(update_fields=['last_login'])
 
+
+    # Return the response
+    return response
 
 # GET AUTHENTICATED USER
 @api_view(['GET'])
 def getautUser(request):
     token = request.COOKIES.get('jwt')
+    
     if not token:
-        raise AuthenticationFailed('UnAuthenticated')
-    # try:
-    #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        raise AuthenticationFailed('Unauthenticated: No token provided.')
 
-    # # except jwt.ExpiredSignatureError:
-    # #     raise AuthenticationFailed('UnAuthenticated, signature expired')
-    # user = User.objects.filter(id = payload['id']).first()
-    # serializer = UserSerializer(user)
-    return Response({token,1})
+    try:
+        payload = jwt.decode(token, 'YOUR_SECRET_KEY_HERE', algorithms=['HS256'])
+        
+        # Retrieve user based on the user ID from the token payload
+        user = User.objects.filter(UserID=payload['id']).first()
+
+        if user is None:
+            raise AuthenticationFailed('User not found.')
+        
+        # Serialize the user object
+        serializer = UserSerializer(user)
+        
+        # Return the serialized user data as a response
+        return Response(serializer.data)
+    
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationFailed('Unauthenticated: Token signature has expired.')
+    
+    except jwt.InvalidTokenError:
+        raise AuthenticationFailed('Unauthenticated: Invalid token.')
 
 @api_view(['POST'])
 def logout(request):
@@ -234,7 +300,7 @@ def deleteTodo(request, id):
 # manging student
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Allow any user (no authentication required for registration)
-def register_student(request):
+def registerStudent(request):
     
     serializer = StudentSerializer(data=request.data)
     if serializer.is_valid():
@@ -243,6 +309,11 @@ def register_student(request):
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
+@api_view(['GET'])
+def getStudent(request):
+    student = Student.objects.all()
+    serializer = StudentSerializer(student, many=True)
+    return Response(serializer.data, status=200)
 
 @api_view(['PUT'])
 def updateStudent(request, StuID):

@@ -51,5 +51,5 @@ class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer(source = 'UserID', read_only=True)
     class Meta:
         model = Student
-        fields = ['StuID', 'StuName', 'StuPhone', 'StuAddress', 'UserID','user','ProID','program']
+        fields = ['StuID', 'UserID','user','ProID','program']
         

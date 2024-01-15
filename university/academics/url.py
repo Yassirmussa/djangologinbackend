@@ -36,7 +36,8 @@ urlpatterns = [
 
 
     # API FOR STUDENT
-    path('insertstudent', views.register_student),
+    path('insertstudent', views.registerStudent),
+    path('getstudent', views.getStudent),
     path('updatestudent/<int:StuID>/', views.updateStudent),
     path('deleteAll', views.deleteAllStudent),
 

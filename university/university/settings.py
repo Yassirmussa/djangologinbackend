@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'academics',
     'corsheaders',
+    'account'
 ]
 
 REST_FRAMEWORK = {
@@ -143,7 +144,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'academics.User'
+AUTH_USER_MODEL = 'account.User'
 
 # CORS_ALLOW_CREDENTIALS = True
 

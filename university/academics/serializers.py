@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from . models import Program, Student,Todos
+from . models import Program, Student, StudentCourse,Todos,Course
 from account.serializers import UserSerializer
 
 
@@ -20,4 +20,16 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['StuID', 'UserID','user','ProID','program']
-        
+
+class CourseSerializer(serializers.ModelSerializer):
+    program = ProgramSerializer(source='ProID', read_only=True)
+    class Meta:
+        model = Course
+        fields = ['CoID','CoTitle','CoCode','Coursework','Exam','ProID','program']
+
+class StudentCourseSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(source="StuID", read_only=True)
+    course = CourseSerializer(source="CoID", read_only=True)
+    class Meta:
+        model = StudentCourse
+        fields = ['SCID','Coursework','Exam','StuID','student','CoID','course']

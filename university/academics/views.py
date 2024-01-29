@@ -1,16 +1,16 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes,authentication_classes
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
 from rest_framework.permissions import AllowAny, IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly
-from . models import Program, Student, Todos
-from . serializers import ProgramSerializer, StudentSerializer ,TodosSerializer
+from . models import Course, Program, Student, Todos
+from . serializers import CourseSerializer, ProgramSerializer, StudentSerializer ,TodosSerializer
 # Create your views here.
 
 def hellomsg(request):
-    return HttpResponse( "Hello from backend")
+    return HttpResponse( "Hello from academics backend")
 
 @api_view(['GET', 'POST'])
 def two_request(request):
@@ -138,12 +138,14 @@ def deleteTodo(request, id):
 
 # manging student
 @api_view(['POST'])
-@permission_classes([AllowAny])  # Allow any user (no authentication required for registration)
-def registerStudent(request):
-    
+@permission_classes([IsAuthenticated])
+def insertStudent(request):
+    # Extract the user from request
+    user = request.user
+    studentData = {'UserID':user.UserID}
+    print(studentData['UserID'])
     serializer = StudentSerializer(data=request.data)
     if serializer.is_valid():
-        # Create a user with a hashed password
         serializer.save()
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
@@ -182,3 +184,68 @@ def deleteAllStudent(request):
     student.delete()
     return Response(f'All student have deleted')
 
+
+# HANDLING COURSE
+# ADD COURSE
+@api_view(['POST'])
+def insertCourse(request):
+    serializer = CourseSerializer(data = request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+# GET ALL COURSES
+@api_view(['GET'])
+def getCourse(request):
+    course = Course.objects.all()
+    serializer = CourseSerializer(course, many=True)
+    return Response(serializer.data, status=200)
+
+# GET COURSE BY ID
+@api_view(['GET'])
+def getCourseByID(request, CoID):
+    try:
+        course = Course.objects.get(CoID = CoID)
+        serializer = CourseSerializer(course)
+        return Response(serializer.data, status=200)
+    except:
+        return Response (f' Course with ID {CoID} does not exist')
+    
+
+# UPDATE COURSE
+@api_view(['PUT'])
+def updateCourse(request, CoID):
+    try:
+        course = Course.objects.get(CoID = CoID)
+        serializer = CourseSerializer(course, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+    except:
+        return Response (f' Course with ID {CoID} does not exist')
+
+
+# DELETE COURSE   
+@api_view(['DELETE'])
+def deleteCourse(request, CoID):
+    try:
+        course = Course.objects.get(CoID = CoID)
+        course.delete()
+        return Response(f'Course with ID {CoID} deleted successifully')
+    except:
+        return Response (f' Course with ID {CoID} does not exist')
+    
+# GET COURESES FALL IN THE SAME PROGRAM
+@api_view(['GET'])
+def getCourseByProID(request, ProID):
+    # try:
+        course = Course.objects.filter(ProID_id = ProID)
+        if (len(course)>0):
+            serializer = CourseSerializer(course, many=True)
+            return Response(serializer.data, status=200)
+        else:
+            return Response(f'Program with ID {ProID} has no any course')
+    # except:
+    #     return Response(f'Program with ID {ProID} has no any course')

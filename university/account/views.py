@@ -5,15 +5,17 @@ from rest_framework.decorators import api_view, permission_classes,authenticatio
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from account.models import User
-from account.serializers import  UserSerializer
+from account.serializers import UserSerializer
 from rest_framework.exceptions import AuthenticationFailed
-from django.contrib.auth.models import auth 
+from django.contrib.auth.models import auth
 import jwt,datetime
 # Create your views here.
 
+def msg(request):
+    return Response('Hello from accountApp')
+
 # HANDLING USER
 # insert
-
 @api_view(['POST'])
 def insertUser(request):
     serializer = UserSerializer(data=request.data)
@@ -87,7 +89,7 @@ def login(request):
     # Define the payload for the JWT token
     payload = {
         'id': user.UserID,  
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1),  # Token expiration time (adjust as needed)
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),  # Token expiration time 
         'iat': datetime.datetime.utcnow(),
     }
 
@@ -98,21 +100,23 @@ def login(request):
     response = Response()
 
     # Set the JWT token in an HTTP-only cookie (adjust cookie attributes as needed)
-    response.set_cookie(key='jwt', value=token, httponly=True, samesite='strict')  
+    response.set_cookie(key='jwt', value=token, httponly=True,expires=payload['exp'].strftime('%a, %d %b %Y %H:%M:%S GMT'), samesite='strict')  
     
     # auth.login(request, user)
     # Update the last_login timestamp for the user
-    user.last_login = datetime.datetime.now()
+    user.last_login = datetime.datetime.utcnow()
     user.save(update_fields=['last_login'])
 
-
+    response.data = {
+        'message':"Login success"
+    }
     # Return the response
     return response
 
 
 # GET AUTHENTICATED USER
 @api_view(['GET'])
-def getautUser(request):
+def getauthUser(request):
     token = request.COOKIES.get('jwt')
     
     if not token:

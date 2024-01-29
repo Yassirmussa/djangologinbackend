@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'university.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'khaluniversity',
+        'NAME': 'djlogin',
         'USER':'yassir',
         'PORT':5432,
         'HOST':'localhost',
@@ -144,7 +144,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'account.User'
+# AUTH_USER_MODEL = 'account.User'
 
 # CORS_ALLOW_CREDENTIALS = True
 

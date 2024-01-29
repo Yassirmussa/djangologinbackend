@@ -2,6 +2,8 @@ from django.urls import path
 from account import views
 
 urlpatterns = [
+
+    path('msg',views.msg),
     # API FOR USER
     path('insertuser', views.insertUser),
     path('getuser', views.getUser),
@@ -12,7 +14,7 @@ urlpatterns = [
     # LOGIN API
     path('login', views.login),
     # AUTH USER
-    path('getauthuser', views.getautUser),
+    path('getauthuser', views.getauthUser),
     # log out
     path('logout', views.logout),
 ]

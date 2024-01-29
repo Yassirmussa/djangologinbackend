@@ -17,14 +17,14 @@ class User(AbstractUser):
         'auth.Group',
         blank=True,
         related_name="user_groups",
-        related_query_name="user",
+        related_query_name="users",
     )
     
     user_permissions = models.ManyToManyField(
         'auth.Permission',
         blank=True,
         related_name="user_permissions",
-        related_query_name="user",
+        related_query_name="users",
     )
 
     class Meta:

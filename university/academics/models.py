@@ -1,57 +1,95 @@
+from operator import truediv
+from re import T
 from django.db import models
 
 from account.models import User
-# Create your models here.
+# # Create your models here.
 
-class Program(models.Model):
-    ProID  = models.AutoField(primary_key=True)
-    ProName = models.CharField(max_length=250)
-    ProDescription = models.CharField(max_length=250)
-    ProCapacity = models.IntegerField()
+class Supervisor(models.Model):
+    SupID = models.AutoField(primary_key=True)
+    UserID = models.OneToOneField(User, on_delete=models.CASCADE)
     class Meta:
-        db_table = 'program'
+        db_table = 'Supervisor'
 
+class Examiner(models.Model):
+    ExID = models.AutoField(primary_key=True)
+    UserID = models.OneToOneField(User, on_delete=models.CASCADE)
+    class Meta:
+        db_table = 'Examiner'
+
+class PostGraduateOfficer(models.Model):
+    PgoID = models.AutoField(primary_key=True)
+    UserID = models.OneToOneField(User, on_delete=models.CASCADE)
+    class Meta:
+        db_table = 'postGraduateOfficer'
+
+program_choices = (
+    ('BITAM', 'BACHELOR OF IT APPLICATION AND MANAGEMENT'),
+    ('BCS', 'BACHELOR OF SCIENCE IN COMPUTER SCIENCE'),
+    ('BAGES','BACHELOR OF ART IN GEORGRAPHY AND ENVIRONMENTAL STUDIES')
+)
 
 class Student(models.Model):
     StuID = models.AutoField(primary_key=True)
-    
+    Program = models.CharField(max_length=10, choices=program_choices)
+    RegNo = models.CharField(max_length=250, unique=True)
     UserID = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    ProID = models.OneToOneField(Program, on_delete=models.CASCADE)
-
     class Meta:
         db_table = 'student'
 
 
-class Course(models.Model):
-    CoID = models.AutoField(primary_key=True)
-    CoTitle = models.CharField(max_length=250)
-    CoCode = models.CharField(max_length=250)
-    Coursework = models.IntegerField()
-    Exam = models.IntegerField()
-    ProID = models.ForeignKey(Program, on_delete=models.CASCADE)
-    
+document_choice = (
+    ('concept_note', 'ConceptNote'),
+    ('proposal', 'Proposal'),
+    ('progres_report', 'ProgresReport')
+)
+
+status_choices = (
+    ('new', 'NEW'),
+    ('progress','PROGRES'),
+    ('completed', 'COMPLETED')
+)
+class Research(models.Model):
+    ResID = models.AutoField(primary_key=True)
+    Title = models.CharField(max_length=250)
+    DocumentType = models.CharField(max_length=100, choices=document_choice)
+    Document = models.FileField(upload_to='documents')
+    Status = models.CharField(max_length=100, choices=status_choices, default='new')
+    is_approved = models.BooleanField(default=False)
+    StuID = models.OneToOneField(Student, on_delete=models.CASCADE)
     class Meta:
-        db_table = 'course'
+        db_table = 'research'
 
-
-class StudentCourse(models.Model):
-    SCID = models.AutoField(primary_key=True)
-    Coursework = models.IntegerField()
-    Exam = models.IntegerField()
-    StuID = models.ForeignKey(Student, on_delete=models.CASCADE)
-    CoID = models.ForeignKey(Course, on_delete=models.CASCADE)
-
+class Recommendation(models.Model):
+    RecID = models.AutoField(primary_key=True)
+    Description = models.CharField(max_length=250)
+    ResID = models.ForeignKey(Research, on_delete=models.CASCADE)
+    SupID = models.ForeignKey(Supervisor, blank=True ,on_delete=models.CASCADE)
+    ExID = models.OneToOneField(Examiner, blank=True ,on_delete=models.CASCADE)
     class Meta:
-        db_table = 'studentcourse'
+        db_table = 'recommendation'
 
+grade_choices = (
+    ('A','A'),
+    ('B+', 'B+'),
+    ('B', 'B'),
+    ('C', 'C'),
+    ('D', 'D'),
+    ('E', 'E')
+)
 
-class Todos(models.Model):
-    id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=250)
-    completed = models.BooleanField(default = False)
+class Result(models.Model):
+    RID = models.AutoField(primary_key=True)
+    Grade = models.CharField(max_length=2, choices=grade_choices)
+    ResID = models.OneToOneField(Research, on_delete=models.CASCADE)
+    ExID = models.OneToOneField(Examiner, on_delete=models.CASCADE)
     class Meta:
-        db_table = 'todos'
+        db_table = 'result'
 
-
-
+class Allocation(models.Model):
+    AID = models.AutoField(primary_key=True)
+    StuID = models.OneToOneField(Student, on_delete=models.CASCADE)
+    SupID = models.ForeignKey(Supervisor, on_delete=models.CASCADE)
+    ExID = models.OneToOneField(Examiner, on_delete=models.CASCADE)
+    class Meta:
+        db_table = 'allocation'

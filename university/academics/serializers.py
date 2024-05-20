@@ -1,35 +1,57 @@
 from rest_framework import serializers
 
-from . models import Program, Student, StudentCourse,Todos,Course
+from academics.models import Allocation, Examiner, PostGraduateOfficer, Student, Research, Recommendation, Result, Supervisor
 from account.serializers import UserSerializer
 
-
-class ProgramSerializer(serializers.ModelSerializer):
+class SupervisorSerializer(serializers.ModelSerializer):
+    user = UserSerializer(source='UserID', read_only=True)
     class Meta:
-        model = Program
+        model = Supervisor
+        fields = '__all__'
+class ExaminerSerializer(serializers.ModelSerializer):
+    user = UserSerializer(source='UserID', read_only=True)
+    class Meta:
+        model = Examiner
         fields = '__all__'
 
-class TodosSerializer(serializers.ModelSerializer):
+class PGOSerializer(serializers.ModelSerializer):
+    user = UserSerializer(source='UserID', read_only=True)
     class Meta:
-        model = Todos
+        model = PostGraduateOfficer
         fields = '__all__'
 
 class StudentSerializer(serializers.ModelSerializer):
-    program = ProgramSerializer(source='ProID', read_only=True)
-    user = UserSerializer(source = 'UserID', read_only=True)
+    user = UserSerializer(source='UserID', read_only=True)
+    supervisor = SupervisorSerializer(source='SupID', read_only=True)
+    examiner = ExaminerSerializer(source='ExID', read_only=True)
     class Meta:
         model = Student
-        fields = ['StuID', 'UserID','user','ProID','program']
+        fields = '__all__'
 
-class CourseSerializer(serializers.ModelSerializer):
-    program = ProgramSerializer(source='ProID', read_only=True)
+class ResearchSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(source='StuID', read_only=True)
     class Meta:
-        model = Course
-        fields = ['CoID','CoTitle','CoCode','Coursework','Exam','ProID','program']
+        model = Research
+        fields = '__all__'
 
-class StudentCourseSerializer(serializers.ModelSerializer):
-    student = StudentSerializer(source="StuID", read_only=True)
-    course = CourseSerializer(source="CoID", read_only=True)
+class RecommendationsSerializer(serializers.ModelSerializer):
+    reseach = ResearchSerializer(source='ResID', read_only=True)
+    supervisor = SupervisorSerializer(source='SupID', read_only=True)
+    examiner = ExaminerSerializer(source='ExID', read_only=True)
     class Meta:
-        model = StudentCourse
-        fields = ['SCID','Coursework','Exam','StuID','student','CoID','course']
+        model = Recommendation
+        fields = '__all__'
+
+class ResultSerializer(serializers.ModelSerializer):
+    reseach = ResearchSerializer(source='ResID', read_only=True)
+    class Meta:
+        model = Result
+        fields = '__all__'
+
+class AllocationSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(source='StuID', read_only=True)
+    supervisor = SupervisorSerializer(source='SupID', read_only=True)
+    examiner = ExaminerSerializer(source='ExID', read_only=True)
+    class Meta:
+        model = Allocation
+        fields = '__all__'

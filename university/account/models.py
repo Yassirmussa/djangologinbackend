@@ -1,15 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
+
+gender_choices = (
+    ('M','Male'),
+    ('F','Female')
+)
+
 class User(AbstractUser):
     UserID = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
+    
+    phonenumber = models.CharField(max_length=10)
+    address = models.CharField(max_length=250)
+    gender = models.CharField(max_length=1, choices=gender_choices)
+
     username = None
-    
-    
-    PhoneNumber = models.CharField(max_length=10)
-    Address = models.CharField(max_length=250)
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 

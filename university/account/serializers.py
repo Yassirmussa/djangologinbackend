@@ -34,3 +34,24 @@ class UserSerializer(serializers.ModelSerializer):
         # Save the instance with the updated information
         instance.save()
         return instance
+
+
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        if user.is_superuser:
+            token['role'] = 'Admin'
+
+            return token
+        elif user.is_staff:
+            token['role'] = 'Staff'
+            return token
+        else:
+            token['role'] = 'Student'
+            return token

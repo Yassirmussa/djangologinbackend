@@ -49,8 +49,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['role'] = 'Admin'
 
             return token
-        elif user.is_staff:
-            token['role'] = 'Staff'
+        elif user.is_examiner:
+            token['role'] = 'Examiner'
+            return token
+        elif user.is_supervisor:
+            token['role'] = 'Supervisor'
+            return token
+        elif user.is_PGO:
+            token['role'] = 'Post Graduate Officer'
             return token
         else:
             token['role'] = 'Student'

@@ -9,13 +9,13 @@ class Supervisor(models.Model):
     SupID = models.AutoField(primary_key=True)
     UserID = models.OneToOneField(User, on_delete=models.CASCADE)
     class Meta:
-        db_table = 'Supervisor'
+        db_table = 'supervisor'
 
 class Examiner(models.Model):
     ExID = models.AutoField(primary_key=True)
     UserID = models.OneToOneField(User, on_delete=models.CASCADE)
     class Meta:
-        db_table = 'Examiner'
+        db_table = 'examiner'
 
 class PostGraduateOfficer(models.Model):
     PgoID = models.AutoField(primary_key=True)
@@ -64,8 +64,8 @@ class Recommendation(models.Model):
     RecID = models.AutoField(primary_key=True)
     Description = models.CharField(max_length=250)
     ResID = models.ForeignKey(Research, on_delete=models.CASCADE)
-    SupID = models.ForeignKey(Supervisor, blank=True ,on_delete=models.CASCADE)
-    ExID = models.OneToOneField(Examiner, blank=True ,on_delete=models.CASCADE)
+    # SupID = models.ForeignKey(Supervisor, blank=True ,on_delete=models.CASCADE)
+    # ExID = models.OneToOneField(Examiner, blank=True ,on_delete=models.CASCADE)
     class Meta:
         db_table = 'recommendation'
 
@@ -82,7 +82,7 @@ class Result(models.Model):
     RID = models.AutoField(primary_key=True)
     Grade = models.CharField(max_length=2, choices=grade_choices)
     ResID = models.OneToOneField(Research, on_delete=models.CASCADE)
-    ExID = models.OneToOneField(Examiner, on_delete=models.CASCADE)
+    # ExID = models.OneToOneField(Examiner, on_delete=models.CASCADE)
     class Meta:
         db_table = 'result'
 
@@ -90,6 +90,6 @@ class Allocation(models.Model):
     AID = models.AutoField(primary_key=True)
     StuID = models.OneToOneField(Student, on_delete=models.CASCADE)
     SupID = models.ForeignKey(Supervisor, on_delete=models.CASCADE)
-    ExID = models.OneToOneField(Examiner, on_delete=models.CASCADE)
+    ExID = models.ForeignKey(Examiner, on_delete=models.CASCADE)
     class Meta:
         db_table = 'allocation'

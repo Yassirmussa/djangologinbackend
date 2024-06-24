@@ -29,6 +29,13 @@ def getUser(request):
     serializer = UserSerializer(user, many=True)
     return Response(serializer.data, status=200)
 
+# delete all users
+@api_view(['DELETE'])
+def deleteusers(request):
+    user = User.objects.all()
+    user.delete()
+    return Response("Success")
+
 
 
 # get by ID
@@ -72,6 +79,7 @@ def deleteUser(request, UserID):
 #     # Set the JWT token in an HTTP-only cookie (adjust cookie attributes as needed)
 #     response.set_cookie(key='jwt', value=token, httponly=True,expires=payload['exp'].strftime('%a, %d %b %Y %H:%M:%S GMT'), samesite='strict')  
 
+
 # Custom Login
 @api_view(['POST'])
 def login(request):
@@ -82,7 +90,7 @@ def login(request):
     tokens = serializer.validated_data
     # Get additional user information
 
-    if user.is_superuser == True:
+    if user.is_superuser:
 
         user_info = {
             'userID': user.UserID,
@@ -96,11 +104,40 @@ def login(request):
             'user_info':user_info
         }
         return Response(response_data, status=200)
-    elif user.is_staff == True:
+    
+    elif user.is_PGO:
         user_info = {
             'userID': user.UserID,
             'firstname': user.first_name,
-            'role':'Staff'
+            'role':'Post Gradute Officer'
+        }
+        
+        response_data = {
+            'refresh': tokens['refresh'],
+            'access': tokens['access'],
+            'user_info':user_info
+        }
+        return Response(response_data, status=200)
+    
+    elif user.is_examiner:
+        user_info = {
+            'userID': user.UserID,
+            'firstname': user.first_name,
+            'role':'Examiner'
+        }
+        
+        response_data = {
+            'refresh': tokens['refresh'],
+            'access': tokens['access'],
+            'user_info':user_info
+        }
+        return Response(response_data, status=200)    
+
+    elif user.is_supervisor:
+        user_info = {
+            'userID': user.UserID,
+            'firstname': user.first_name,
+            'role':'Supervisor'
         }
         
         response_data = {

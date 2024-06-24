@@ -22,8 +22,6 @@ class PGOSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer(source='UserID', read_only=True)
-    supervisor = SupervisorSerializer(source='SupID', read_only=True)
-    examiner = ExaminerSerializer(source='ExID', read_only=True)
     class Meta:
         model = Student
         fields = '__all__'
@@ -36,14 +34,14 @@ class ResearchSerializer(serializers.ModelSerializer):
 
 class RecommendationsSerializer(serializers.ModelSerializer):
     reseach = ResearchSerializer(source='ResID', read_only=True)
-    supervisor = SupervisorSerializer(source='SupID', read_only=True)
-    examiner = ExaminerSerializer(source='ExID', read_only=True)
+    # supervisor = SupervisorSerializer(source='SupID', read_only=True)
+    # examiner = ExaminerSerializer(source='ExID', read_only=True)
     class Meta:
         model = Recommendation
         fields = '__all__'
 
 class ResultSerializer(serializers.ModelSerializer):
-    reseach = ResearchSerializer(source='ResID', read_only=True)
+    research = ResearchSerializer(source='ResID', read_only=True)
     class Meta:
         model = Result
         fields = '__all__'

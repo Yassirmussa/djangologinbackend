@@ -15,8 +15,11 @@ class User(AbstractUser):
     address = models.CharField(max_length=250)
     gender = models.CharField(max_length=1, choices=gender_choices)
 
+    is_supervisor = models.BooleanField(default=False)
+    is_examiner = models.BooleanField(default=False)
+    is_PGO = models.BooleanField(default=False)
+    
     username = None
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
